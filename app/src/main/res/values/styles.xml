@@ -1,0 +1,9 @@
+<resources>
+    <style name="OrientationChangeAnimation">
+        <item name="android:activityOpenEnterAnimation">@anim/rotate_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/rotate_out</item>
+        <item name="android:activityCloseEnterAnimation">@anim/rotate_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/rotate_out</item>
+    </style>
+
+</resources>

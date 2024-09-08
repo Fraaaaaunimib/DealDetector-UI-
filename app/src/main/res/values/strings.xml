@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Codename Navi</string>
+    <string name="my_offers">Le mie offerte</string>
+    <string name="discover_best_offers">Scopri le migliori offerte selezionate per te</string>
+    <string name="view_option">Vista: %1$s</string>
+    <string name="sort_option">Ordina: %1$s</string>
+    <string name="grid">Griglia</string>
+    <string name="list">Lista</string>
+    <string name="ascending">Ascendente</string>
+    <string name="descending">Discendente</string>
+</resources>
