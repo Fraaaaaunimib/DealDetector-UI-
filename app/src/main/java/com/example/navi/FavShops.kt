@@ -14,10 +14,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Store
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.core.view.WindowCompat
 import com.example.navi.ui.theme.Test3Theme
 
 data class Shop(val name: String, val icon: ImageVector)
@@ -26,10 +29,10 @@ data class Shop(val name: String, val icon: ImageVector)
 @Composable
 fun FavShopsScreen(onBack: () -> Unit, preferencesManager: PreferencesManager) {
     val shops = listOf(
-        Shop("Esselunga", Icons.Filled.Store),
-        Shop("Lidl", Icons.Filled.Store),
-        Shop("Aldi", Icons.Filled.Store),
-        Shop("Carrefour", Icons.Filled.Store)
+        Shop(stringResource(R.string.esselunga), Icons.Filled.Store),
+        Shop(stringResource(R.string.lidl), Icons.Filled.Store),
+        Shop(stringResource(R.string.aldi), Icons.Filled.Store),
+        Shop(stringResource(R.string.carrefour), Icons.Filled.Store)
     )
     var checkedState by remember { mutableStateOf(preferencesManager.favoriteShops) }
 
@@ -39,7 +42,7 @@ fun FavShopsScreen(onBack: () -> Unit, preferencesManager: PreferencesManager) {
                 title = { Text(text = "") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -53,15 +56,13 @@ fun FavShopsScreen(onBack: () -> Unit, preferencesManager: PreferencesManager) {
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Supermercati preferiti",
+                text = stringResource(R.string.favorite_shops),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
             Text(
-                text = "Le offerte dei supermercati che hai selezionato in questa lista " +
-                        "verranno mostrate nella pagina \" Le mie offerte\". " +
-                        "Per vedere tutte le offerte disponibili, vai in Categorie.",
+                text = stringResource(R.string.favorite_shops_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -106,7 +107,7 @@ fun FavShopsScreen(onBack: () -> Unit, preferencesManager: PreferencesManager) {
                             modifier = Modifier.weight(1f)
                         )
                         IconButton(onClick = { /* Handle settings click */ }) {
-                            Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                            Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
                         }
                     }
                 }
@@ -122,6 +123,17 @@ class FavShopsActivity : FragmentActivity() {
         val currentTheme = preferencesManager.currentTheme
         setContent {
             Test3Theme(theme = currentTheme) {
+                val context = LocalContext.current
+                val backgroundColor = MaterialTheme.colorScheme.background
+                val surfaceContainerColor = MaterialTheme.colorScheme.surfaceContainer
+
+                SideEffect {
+                    val window = (context as FragmentActivity).window
+                    WindowCompat.setDecorFitsSystemWindows(window, false)
+                    window.statusBarColor = backgroundColor.toArgb()
+                    window.navigationBarColor = surfaceContainerColor.toArgb()
+                }
+
                 FavShopsScreen(onBack = { finish() }, preferencesManager = preferencesManager)
             }
         }

@@ -1,47 +1,33 @@
-// Update PreferencesManager to handle favorite shops
 package com.example.navi
 
 import android.content.Context
 import android.content.SharedPreferences
 
-//PreferencesManager: classe per gestire impostazioni comuni
-class PreferencesManager(context: Context) {
+class PreferencesManager(private val context: Context) {
     private val sharedPreferences: SharedPreferences =
-        context.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+        context.getSharedPreferences(context.getString(R.string.app_preferences), Context.MODE_PRIVATE)
 
     var requireIdentification: Boolean
-        get() = sharedPreferences.getBoolean("require_identification", false)
-        set(value) = sharedPreferences.edit().putBoolean("require_identification", value).apply()
+        get() = sharedPreferences.getBoolean(context.getString(R.string.require_identification_key), false)
+        set(value) = sharedPreferences.edit().putBoolean(context.getString(R.string.require_identification_key), value).apply()
 
     var currentTheme: String
-        get() = sharedPreferences.getString("currentTheme", "Predefinito di sistema") ?: "Predefinito di sistema"
-        set(value) = sharedPreferences.edit().putString("currentTheme", value).apply()
-
-    var isDarkTheme: Boolean
-        get() = sharedPreferences.getBoolean("isDarkTheme", false)
-        set(value) = sharedPreferences.edit().putBoolean("isDarkTheme", value).apply()
+        get() = sharedPreferences.getString(context.getString(R.string.current_theme_key), context.getString(R.string.default_theme)) ?: context.getString(R.string.default_theme)
+        set(value) = sharedPreferences.edit().putString(context.getString(R.string.current_theme_key), value).apply()
 
     var viewOption: String
-        get() = sharedPreferences.getString("viewOption", "List") ?: "List"
-        set(value) = sharedPreferences.edit().putString("viewOption", value).apply()
+        get() = sharedPreferences.getString(context.getString(R.string.view_option_key), context.getString(R.string.default_view_option)) ?: context.getString(R.string.default_view_option)
+        set(value) = sharedPreferences.edit().putString(context.getString(R.string.view_option_key), value).apply()
 
     var sortOption: String
-        get() = sharedPreferences.getString("sortOption", "Discendente") ?: "Discendente"
-        set(value) = sharedPreferences.edit().putString("sortOption", value).apply()
-
-    var showDettagliMenu: Boolean
-        get() = sharedPreferences.getBoolean("showDettagliMenu", false)
-        set(value) = sharedPreferences.edit().putBoolean("showDettagliMenu", value).apply()
-
-    var showOrdinaMenu: Boolean
-        get() = sharedPreferences.getBoolean("showOrdinaMenu", false)
-        set(value) = sharedPreferences.edit().putBoolean("showOrdinaMenu", value).apply()
+        get() = sharedPreferences.getString(context.getString(R.string.sort_option_key), context.getString(R.string.default_sort_option)) ?: context.getString(R.string.default_sort_option)
+        set(value) = sharedPreferences.edit().putString(context.getString(R.string.sort_option_key), value).apply()
 
     var offersPerRow: Int
-        get() = sharedPreferences.getInt("offersPerRow", 2)
-        set(value) = sharedPreferences.edit().putInt("offersPerRow", value).apply()
+        get() = sharedPreferences.getInt(context.getString(R.string.offers_per_row_key), 2)
+        set(value) = sharedPreferences.edit().putInt(context.getString(R.string.offers_per_row_key), value).apply()
 
     var favoriteShops: Set<String>
-        get() = sharedPreferences.getStringSet("favoriteShops", emptySet()) ?: emptySet()
-        set(value) = sharedPreferences.edit().putStringSet("favoriteShops", value).apply()
+        get() = sharedPreferences.getStringSet(context.getString(R.string.favorite_shops_key), emptySet()) ?: emptySet()
+        set(value) = sharedPreferences.edit().putStringSet(context.getString(R.string.favorite_shops_key), value).apply()
 }

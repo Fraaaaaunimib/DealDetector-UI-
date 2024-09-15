@@ -1,114 +1,187 @@
 package com.example.navi
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.launch
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.material.icons.automirrored.filled.ViewList
 
-// Menu Dettagli e Ordina per lo schermo Le Mie Offerte
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DettagliDropdownMenu(
+fun DettagliBottomSheet(
     preferencesManager: PreferencesManager,
-    showDettagliMenu: Boolean,
-    onShowDettagliMenuChange: (Boolean) -> Unit,
+    showDettagliSheet: Boolean,
+    onShowDettagliSheetChange: (Boolean) -> Unit,
     viewOption: String,
     onViewOptionChange: (String, Int) -> Unit
 ) {
-    var sliderValue by remember { mutableStateOf(preferencesManager.offersPerRow.toFloat()) }
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    val bottomSheetState = remember {
+        SheetState(
+            skipPartiallyExpanded = true,
+            initialValue = if (showDettagliSheet) SheetValue.Expanded else SheetValue.Hidden,
+            density = density
+        )
+    }
 
-    DropdownMenu(
-        expanded = showDettagliMenu,
-        onDismissRequest = { onShowDettagliMenuChange(false) },
-        modifier = Modifier
-            .width(300.dp)
-            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+    LaunchedEffect(showDettagliSheet) {
+        if (showDettagliSheet) {
+            scope.launch { bottomSheetState.expand() }
+        } else {
+            scope.launch { bottomSheetState.hide() }
+        }
+    }
+
+    ModalBottomSheet(
+        sheetState = bottomSheetState,
+        onDismissRequest = { onShowDettagliSheetChange(false) },
+        modifier = Modifier.graphicsLayer {
+            translationY = if (bottomSheetState.isVisible) 0f else 1000f
+        }
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        AnimatedVisibility(
+            visible = showDettagliSheet,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it })
         ) {
-            Text(
-                text = "Offerte per riga",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Slider(
-                value = sliderValue,
-                onValueChange = { newValue ->
-                    sliderValue = newValue
-                    onViewOptionChange(viewOption, newValue.toInt())
-                    preferencesManager.offersPerRow = newValue.toInt()
-                },
-                valueRange = 1f..4f,
-                steps = 2,
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(16.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.ViewList,
-                    contentDescription = "List View",
+                Text(
+                    text = stringResource(id = R.string.offers_per_row),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = 16.dp)
                 )
-                Text(
-                    text = if (sliderValue.toInt() == 1) "Visualizzazione a lista" else
-                        "${sliderValue.toInt()} offerte per riga",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                Spacer(modifier = Modifier.height(8.dp))
+                var sliderValue by remember { mutableFloatStateOf(preferencesManager.offersPerRow.toFloat()) }
+                Slider(
+                    value = sliderValue,
+                    onValueChange = { newValue ->
+                        sliderValue = newValue
+                        onViewOptionChange(viewOption, newValue.toInt())
+                        preferencesManager.offersPerRow = newValue.toInt()
+                    },
+                    valueRange = 1f..4f,
+                    steps = 2,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 )
-                Icon(
-                    imageVector = Icons.Filled.GridView,
-                    contentDescription = "Grid View",
-                    modifier = Modifier.padding(end = 16.dp)
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            if (sliderValue > 1) {
+                                sliderValue -= 1
+                                onViewOptionChange(viewOption, sliderValue.toInt())
+                                preferencesManager.offersPerRow = sliderValue.toInt()
+                            }
+                        },
+                        modifier = Modifier.padding(start = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ViewList,
+                            contentDescription = stringResource(id = R.string.list)
+                        )
+                    }
+                    Text(
+                        text = if (sliderValue.toInt() == 1) stringResource(id = R.string.list_view) else
+                            stringResource(id = R.string.offers_per_row_count, sliderValue.toInt()),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    IconButton(
+                        onClick = {
+                            if (sliderValue < 4) {
+                                sliderValue += 1
+                                onViewOptionChange(viewOption, sliderValue.toInt())
+                                preferencesManager.offersPerRow = sliderValue.toInt()
+                            }
+                        },
+                        modifier = Modifier.padding(end = 16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.GridView,
+                            contentDescription = stringResource(id = R.string.grid)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrdinaDropdownMenu(
-    preferencesManager: PreferencesManager,
-    showOrdinaMenu: Boolean,
-    onShowOrdinaMenuChange: (Boolean) -> Unit,
-    sortOption: String,
+fun OrdinaBottomSheet(
+    showOrdinaSheet: Boolean,
+    onShowOrdinaSheetChange: (Boolean) -> Unit,
     onSortOptionChange: (String) -> Unit
 ) {
-    DropdownMenu(
-        expanded = showOrdinaMenu,
-        onDismissRequest = { onShowOrdinaMenuChange(false) },
-        modifier = Modifier
-            .width(300.dp)
-            .background(MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium)
+    val scope = rememberCoroutineScope()
+    val bottomSheetState = remember {
+        SheetState(
+            skipPartiallyExpanded = true,
+            initialValue = if (showOrdinaSheet) SheetValue.Expanded else SheetValue.Hidden
+        )
+    }
+
+    LaunchedEffect(showOrdinaSheet) {
+        if (showOrdinaSheet) {
+            scope.launch { bottomSheetState.expand() }
+        } else {
+            scope.launch { bottomSheetState.hide() }
+        }
+    }
+
+    ModalBottomSheet(
+        sheetState = bottomSheetState,
+        onDismissRequest = { onShowOrdinaSheetChange(false) },
+        modifier = Modifier.graphicsLayer {
+            translationY = if (bottomSheetState.isVisible) 0f else 1000f
+        }
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        AnimatedVisibility(
+            visible = showOrdinaSheet,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it })
         ) {
-            Text(
-                text = "Ordina per",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            //sorting options
-            TextButton(onClick = { onSortOptionChange("Option 1") }) {
-                Text("Option 1")
-            }
-            TextButton(onClick = { onSortOptionChange("Option 2") }) {
-                Text("Option 2")
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.sort_by),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(onClick = { onSortOptionChange("Option 1") }) {
+                    Text(stringResource(id = R.string.option_1))
+                }
+                TextButton(onClick = { onSortOptionChange("Option 2") }) {
+                    Text(stringResource(id = R.string.option_2))
+                }
             }
         }
     }

@@ -7,21 +7,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
-//Dialogo del tema in Impostazioni
 @Composable
 fun ThemeDialog(
     onDismiss: () -> Unit,
     preferencesManager: PreferencesManager,
     onThemeChange: (String) -> Unit
 ) {
-    val themes = listOf("Predefinito di sistema", "Chiaro", "Scuro")
+    val themes = listOf(
+        stringResource(R.string.default_theme),
+        stringResource(R.string.light_theme),
+        stringResource(R.string.dark_theme)
+    )
     val currentTheme = preferencesManager.currentTheme
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Seleziona tema") },
+        title = { Text(stringResource(R.string.select_theme)) },
         text = {
             Column {
                 themes.forEach { theme ->

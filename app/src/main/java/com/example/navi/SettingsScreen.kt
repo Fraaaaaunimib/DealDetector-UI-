@@ -1,3 +1,4 @@
+// com/example/navi/SettingsScreen.kt
 package com.example.navi
 
 import android.content.Intent
@@ -15,14 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
 //icons
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
@@ -32,45 +33,21 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.fragment.app.FragmentActivity
-import androidx.navigation.NavController
-
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-
-import androidx.navigation.NavOptionsBuilder
-import androidx.navigation.navOptions
-
-// Constants for strings
-const val PROFILE_ICON_DESC = "Profile Icon"
-const val USERNAME = "Username"
-const val USER_EMAIL = "user@example.com"
-const val SUPERMARKETS_OFFERS = "Supermercati e offerte"
-const val HISTORY = "Cronologia"
-const val FAVORITE_SUPERMARKETS = "Supermercati preferiti"
-const val USER_ACCOUNT_SECURITY = "Account utente e sicurezza"
-const val REQUIRE_AUTHENTICATION = "Richiedi autenticazione quando apro l'app"
-const val PASSWORD = "Modifica la password del tuo account"
-const val LOGOUT = "Logout"
-const val APP_SETTINGS = "Impostazioni dell'app"
-const val NOTIFICATIONS = "Notifiche"
-const val THEME = "Tema"
+import androidx.lifecycle.ViewModelProvider
 
 val CATEGORY_SPACING = 16.dp
 
-//Pagina impostazioni - praticamente finita
 @Composable
 fun SettingsScreen(
     preferencesManager: PreferencesManager,
     onLogout: () -> Unit,
-    onThemeChange: (String) -> Unit,
-    navController: NavController
+    onThemeChange: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val sharedViewModel: SharedViewModel =
+        ViewModelProvider(context as FragmentActivity, SharedViewModelFactory(preferencesManager))[SharedViewModel::class.java]
     var showThemeDialog by remember { mutableStateOf(false) }
-    var requireIdentification by remember { mutableStateOf(preferencesManager.requireIdentification) }
+    val requireIdentification by sharedViewModel.requireIdentification.collectAsState()
     var currentTheme by rememberSaveable { mutableStateOf(preferencesManager.currentTheme) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -81,19 +58,19 @@ fun SettingsScreen(
             .padding(16.dp)
     ) {
         item { ProfileSection() }
-        item { SettingsCategory(title = "Supermercati e offerte") }
-        item { SettingsEntry(icon = Icons.Default.Store, title = "Supermercati preferiti",
+        item { SettingsCategory(title = stringResource(R.string.supermarkets_offers)) }
+        item { SettingsEntry(icon = Icons.Default.Store, title = stringResource(R.string.favorite_shops),
             onClick = {
                 val intent = Intent(context, FavShopsActivity::class.java)
                 context.startActivity(intent)
             }
-            ) }
+        ) }
         item { Spacer(modifier = Modifier.height(CATEGORY_SPACING)) }
-        item { SettingsCategory(title = "Impostazioni dell'app") }
+        item { SettingsCategory(title = stringResource(R.string.app_settings)) }
         item {
             SettingsEntry(
                 icon = Icons.Filled.Notifications,
-                title = "Notifiche",
+                title = stringResource(R.string.notifications),
                 onClick = {
                     val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
                         putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
@@ -105,7 +82,7 @@ fun SettingsScreen(
         item {
             SettingsEntry(
                 icon = Icons.Filled.Palette,
-                title = "Tema",
+                title = stringResource(R.string.theme),
                 subtitle = currentTheme,
                 onClick = { showThemeDialog = true }
             )
@@ -113,7 +90,7 @@ fun SettingsScreen(
         item {
             SettingsEntry(
                 icon = Icons.Default.Build,
-                title = "Changelog",
+                title = stringResource(R.string.changelog),
                 onClick = {
                     val intent = Intent(context, ChangelogActivity::class.java)
                     context.startActivity(intent)
@@ -121,20 +98,18 @@ fun SettingsScreen(
             )
         }
         item { Spacer(modifier = Modifier.height(CATEGORY_SPACING)) }
-        item { SettingsCategory(title = "Account utente e sicurezza") }
+        item { SettingsCategory(title = stringResource(R.string.user_account_security)) }
         item {
             SettingsEntryToggle(
                 icon = Icons.Default.Security,
-                title = "Richiedi autenticazione quando apro l'app",
+                title = stringResource(R.string.require_authentication),
                 checked = requireIdentification,
                 onCheckedChange = {
                     showBiometricPrompt(
-                        activity = context as FragmentActivity,
+                        activity = context,
                         onSuccess = {
-                            requireIdentification = it
-                            preferencesManager.requireIdentification = it
+                            sharedViewModel.setRequireIdentification(it)
                         },
-                        onFailure = {},
                         onCancel = {}
                     )
                 },
@@ -147,12 +122,11 @@ fun SettingsScreen(
         item {
             SettingsEntry(
                 icon = Icons.Default.Lock,
-                title = "Modifica la password del tuo account",
+                title = stringResource(R.string.password),
                 onClick = {
                     showBiometricPrompt(
-                        activity = context as FragmentActivity,
+                        activity = context,
                         onSuccess = {},
-                        onFailure = {},
                         onCancel = {}
                     )
                 }
@@ -160,8 +134,8 @@ fun SettingsScreen(
         }
         item {
             SettingsEntry(
-                icon = Icons.Default.ExitToApp,
-                title = "Esci dal tuo account",
+                icon = Icons.AutoMirrored.Filled.ExitToApp,
+                title = stringResource(R.string.logout),
                 onClick = { showLogoutDialog = true }
             )
         }
@@ -183,8 +157,8 @@ fun SettingsScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Esci dal tuo account") },
-            text = { Text("Sei sicuro di voler uscire dal tuo account?") },
+            title = { Text(stringResource(R.string.confirm_logout)) },
+            text = { Text(stringResource(R.string.confirm_logout_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -194,12 +168,12 @@ fun SettingsScreen(
                         context.startActivity(intent)
                     }
                 ) {
-                    Text("Conferma")
+                    Text(stringResource(R.string.confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancella")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -214,19 +188,19 @@ fun ProfileSection() {
     ) {
         Icon(
             imageVector = Icons.Filled.Person,
-            contentDescription = PROFILE_ICON_DESC,
+            contentDescription = stringResource(R.string.profile_icon_desc),
             modifier = Modifier.size(70.dp),
             tint = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(
-                text = USERNAME,
+                text = stringResource(R.string.username),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = USER_EMAIL,
+                text = stringResource(R.string.user_email),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -241,7 +215,7 @@ fun ProfileSection() {
         ) {
             Icon(
                 imageVector = Icons.Filled.Edit,
-                contentDescription = "Edit Profile",
+                contentDescription = stringResource(R.string.edit_profile),
                 tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
         }
@@ -290,13 +264,13 @@ fun SettingsEntryToggle(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
-        Divider(
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-            modifier = Modifier
-                .height(24.dp)
-                .width(1.dp)
-                .padding(end = 8.dp)
-        )
+        HorizontalDivider(
+    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+    modifier = Modifier
+        .height(24.dp)
+        .width(1.dp)
+        .padding(end = 8.dp)
+)
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
@@ -314,7 +288,7 @@ fun SettingsCategory(title: String) {
         color = MaterialTheme.colorScheme.primary
     )
     Spacer(modifier = Modifier.height(4.dp))
-    Divider()
+   HorizontalDivider()
 }
 
 @Composable

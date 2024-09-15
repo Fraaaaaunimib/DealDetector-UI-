@@ -1,6 +1,5 @@
 package com.example.navi
 
-import android.content.Intent
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
@@ -21,41 +20,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 
-/* Le mie offerte
-Da fare: quando il telefono è in orizzontale e cambio il numero di offerte, la griglia non si
-aggiorna
-* */
 @Composable
 fun DealsScreen(
     viewOption: String,
     onViewOptionChange: (String, Int) -> Unit,
-    sortOption: String,
     onSortOptionChange: (String) -> Unit,
-    showDettagliMenu: Boolean,
-    onShowDettagliMenuChange: (Boolean) -> Unit,
-    showOrdinaMenu: Boolean,
-    onShowOrdinaMenuChange: (Boolean) -> Unit,
     preferencesManager: PreferencesManager
 ) {
     var showDettagliMenuState by remember { mutableStateOf(false) }
     var showOrdinaMenuState by remember { mutableStateOf(false) }
-    var offersPerRow by remember { mutableStateOf(preferencesManager.offersPerRow) }
+    var offersPerRow by remember { mutableIntStateOf(preferencesManager.offersPerRow) }
     var selectedDeal by remember { mutableStateOf<Deal?>(null) }
     var isTitleVisible by remember { mutableStateOf(true) }
     var isFloatingBarVisible by remember { mutableStateOf(true) }
 
-
-    //Esempio di offerte, per vedere come stanno e come si comporta
     val deals = listOf(
         Deal(
             title = "Deal 1",
             subtitle = "Subtitle 1",
             detail = "Detail 1",
-            supermarket = "Supermarket 1444444444444444444444444444444444444444",
+            supermarket = "Supermarket 1",
             category = "Category 1",
             priceKilo = 10.0,
             priceDeal = 8.0,
@@ -67,7 +56,8 @@ fun DealsScreen(
 
     val gridState = rememberLazyGridState()
 
-    LaunchedEffect(gridState.firstVisibleItemIndex, gridState.firstVisibleItemScrollOffset) {
+    LaunchedEffect(remember { derivedStateOf { gridState.firstVisibleItemIndex } },
+        remember { derivedStateOf { gridState.firstVisibleItemScrollOffset } }) {
         val isScrollingDown = gridState.firstVisibleItemScrollOffset > 0
         val isAtBottom = gridState.firstVisibleItemIndex +
                 gridState.layoutInfo.visibleItemsInfo.size >= gridState.layoutInfo.totalItemsCount
@@ -120,13 +110,13 @@ fun DealsScreen(
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Le mie offerte",
+                        text = stringResource(id = R.string.my_offers),
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Scopri le offerte dedicate a te",
+                        text = stringResource(id = R.string.discover_offers),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.inversePrimary
                     )
@@ -190,7 +180,6 @@ fun DealsScreen(
                         offersPerRow = offers
                         preferencesManager.offersPerRow = offers
                     },
-                    sortOption = sortOption,
                     onSortOptionChange = onSortOptionChange,
                     modifier = Modifier.padding(bottom = 0.dp)
                 )
@@ -199,7 +188,6 @@ fun DealsScreen(
     }
 }
 
-//Barra sotto con Dettagli e Ordina - si possono aggiungere altri chip
 @Composable
 fun FloatingBar(
     showDettagliMenu: Boolean,
@@ -209,7 +197,6 @@ fun FloatingBar(
     preferencesManager: PreferencesManager,
     viewOption: String,
     onViewOptionChange: (String, Int) -> Unit,
-    sortOption: String,
     onSortOptionChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -229,11 +216,13 @@ fun FloatingBar(
             AssistChip(
                 onClick = { onShowDettagliMenuChange(!showDettagliMenu) },
                 label = {
-                    Row {
-                        Text("Dettagli")
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Text(stringResource(id = R.string.details))
                         Icon(
                             imageVector = Icons.Filled.ArrowDropUp,
-                            contentDescription = "Open Dettagli Menu"
+                            contentDescription = stringResource(id = R.string.open_details_menu)
                         )
                     }
                 }
@@ -242,11 +231,13 @@ fun FloatingBar(
             AssistChip(
                 onClick = { onShowOrdinaMenuChange(!showOrdinaMenu) },
                 label = {
-                    Row {
-                        Text("Ordina")
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Text(stringResource(id = R.string.sort))
                         Icon(
                             imageVector = Icons.Filled.ArrowDropUp,
-                            contentDescription = "Open Ordina Menu"
+                            contentDescription = stringResource(id = R.string.open_sort_menu)
                         )
                     }
                 }
@@ -254,21 +245,19 @@ fun FloatingBar(
         }
 
         if (showDettagliMenu) {
-            DettagliDropdownMenu(
+            DettagliBottomSheet(
                 preferencesManager = preferencesManager,
-                showDettagliMenu = showDettagliMenu,
-                onShowDettagliMenuChange = onShowDettagliMenuChange,
+                showDettagliSheet = showDettagliMenu,
+                onShowDettagliSheetChange = onShowDettagliMenuChange,
                 viewOption = viewOption,
                 onViewOptionChange = onViewOptionChange
             )
         }
 
         if (showOrdinaMenu) {
-            OrdinaDropdownMenu(
-                preferencesManager = preferencesManager,
-                showOrdinaMenu = showOrdinaMenu,
-                onShowOrdinaMenuChange = onShowOrdinaMenuChange,
-                sortOption = sortOption,
+            OrdinaBottomSheet(
+                showOrdinaSheet = showOrdinaMenu,
+                onShowOrdinaSheetChange = onShowOrdinaMenuChange,
                 onSortOptionChange = onSortOptionChange
             )
         }

@@ -1,11 +1,112 @@
 <resources>
-    <string name="app_name">Codename Navi</string>
-    <string name="my_offers">Le mie offerte</string>
-    <string name="discover_best_offers">Scopri le migliori offerte selezionate per te</string>
-    <string name="view_option">Vista: %1$s</string>
-    <string name="sort_option">Ordina: %1$s</string>
-    <string name="grid">Griglia</string>
-    <string name="list">Lista</string>
-    <string name="ascending">Ascendente</string>
-    <string name="descending">Discendente</string>
+    <string name="app_name" translatable="false">Codename Navi</string>
+    <string name="discover_best_offers">Discover the best offers, chosen for you</string>
+    <string name="view_option">View: %1$s</string>
+    <string name="sort_option">Order by: %1$s</string>
+    <string name="grid">Grid</string>
+    <string name="list">List</string>
+    <string name="ascending">From A to Z</string>
+    <string name="descending">From Z to A</string>
+    <string name="request_authentication">Request authentication when I open the app</string>
+    <string name="request_authentication_option">Request authentication</string>
+    <string name="authentication_description">This options requires you to authenticate with your finger, or face, or PIN, every time you open the app, for better security.</string>
+    <string name="back">Back</string>
+    <string name="biometric_prompt_title">Use your face, finger, or PIN</string>
+    <string name="biometric_prompt_subtitle">To use this feature, you must authenticate</string>
+    <string name="error_message">Error: %1$s</string>
+    <string name="authentication_failed">Authentication failed</string>
+    <string name="categories">Categories</string>
+    <string name="discover_offers">Discover the offers available to you</string>
+    <string name="categories_screen">Categories Screen</string>
+    <string name="deal_title">Deal Title</string>
+    <string name="deal_subtitle">Deal Subtitle</string>
+    <string name="deal_detail">Deal Detail</string>
+    <string name="discount">%1$s off</string>
+    <string name="price">Price: %1$s</string>
+    <string name="store">Shop</string>
+    <string name="price_per_kilo">Price per kilo</string>
+    <string name="normal_price">Price without the deal</string>
+    <string name="deal_type">Type of deal</string>
+    <string name="offers_per_row">Deals per row</string>
+    <string name="list_view">List view</string>
+    <string name="offers_per_row_count">%1$d deals per row</string>
+    <string name="sort_by">Order by</string>
+    <string name="option_1">Option 1</string>
+    <string name="option_2">Option 2</string>
+    <string name="my_offers">My deals</string>
+    <string name="details">Details</string>
+    <string name="sort">Order by</string>
+    <string name="open_details_menu">Open Dettagli Menu</string>
+    <string name="open_sort_menu">Open Ordina Menu</string>
+    <string name="favorite_shops">Favourite shops</string>
+    <string name="favorite_shops_description">The deals of the supermarkets you\'ve selected in this list will be shown in the My deals page. To see all the deals available, go to the Categories page.</string>
+    <string name="settings">Settings</string>
+    <string name="esselunga" translatable="false">Esselunga</string>
+    <string name="lidl" translatable="false">Lidl</string>
+    <string name="aldi" translatable="false">Aldi</string>
+    <string name="carrefour" translatable="false">Carrefour</string>
+    <string name="welcome">Welcome</string>
+    <string name="welcome_to">to %1$s</string>
+    <string name="google_logo" translatable="false">Google Logo</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="username">Nome utente</string>
+    <string name="email">Email</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
+    <string name="registration">Sign Up</string>
+    <string name="registration_prompt">Registration prompt</string>
+    <string name="login">Login</string>
+    <string name="no_account">Don\\\'t have an account?</string>
+    <string name="use_without_account">Use without account</string>
+    <string-array name="tabs">
+        <item>Categorie</item>
+        <item>Le mie offerte</item>
+        <item>Ricerca</item>
+        <item>Impostazioni</item>
+    </string-array>
+
+    <string name="app_preferences">app_preferences</string>
+    <string name="require_identification_key">require_identification</string>
+    <string name="current_theme_key">currentTheme</string>
+    <string name="is_dark_theme_key">isDarkTheme</string>
+    <string name="view_option_key">viewOption</string>
+    <string name="sort_option_key">sortOption</string>
+    <string name="show_dettagli_menu_key">showDettagliMenu</string>
+    <string name="show_ordina_menu_key">showOrdinaMenu</string>
+    <string name="offers_per_row_key">offersPerRow</string>
+    <string name="favorite_shops_key">favoriteShops</string>
+    <string name="default_theme">Default</string>
+    <string name="default_view_option">List</string>
+    <string name="default_sort_option">Descedent</string>
+    <string name="profile_icon_desc" translatable="false">Profile Icon</string>
+    <string name="user_email" translatable="false">user@example.com</string>
+    <string name="supermarkets_offers">Shops and deals</string>
+    <string name="user_account_security">Account utente e sicurezza</string>
+    <string name="require_authentication">Richiedi autenticazione quando apro l\\\'app</string>
+    <string name="password">Change the password of your account</string>
+    <string name="logout">Logout</string>
+    <string name="app_settings">Impostazioni dell\\\'app</string>
+    <string name="notifications">Notifiche</string>
+    <string name="theme">Tema</string>
+    <string name="confirm_logout">Esci dal tuo account</string>
+    <string name="confirm_logout_message">Sei sicuro di voler uscire dal tuo account?</string>
+    <string name="cancel">Cancella</string>
+    <string name="changelog">Changelog</string>
+    <string name="light_theme">Light</string>
+    <string name="dark_theme">Dark</string>
+    <string name="select_theme">Select theme</string>
+    <string name="confirm">Conferma</string>
+    <string name="confirm_back_message">Are you sure to go back? You won\'t be able to recover what you\'ve written so far.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="register">Sign up</string>
+    <string name="registration_info">Once you\'ve logged in, you\'ll never have to re-enter this password again. You\'ll only be requested to access via biometric authentication, if enabled in Settings.</string>
+    <string name="passwords_do_not_match">Passwords do not match</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="edit_profile">Edit profile</string>
+    <string name="setup_content_log">Setup content</string>
 </resources>

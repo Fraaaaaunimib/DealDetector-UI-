@@ -5,6 +5,8 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -20,7 +22,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -47,18 +48,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Modifier
-import androidx.navigation.findNavController
+import androidx.compose.ui.res.stringResource
 
-// Method to get the default_web_client_id from a configuration file or environment variable
 fun getDefaultWebClientId(): String {
     return System.getenv("DEFAULT_WEB_CLIENT_ID") ?: "YOUR_DEFAULT_WEB_CLIENT_ID"
 }
 
 class LoginActivity : ComponentActivity() {
     private lateinit var googleSignInClient: GoogleSignInClient
-    private val RC_SIGN_IN = 9001
     private lateinit var preferencesManager: PreferencesManager
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,15 +67,20 @@ class LoginActivity : ComponentActivity() {
         val appName = getString(R.string.app_name)
         val currentTheme = preferencesManager.currentTheme
 
-        // Initialize Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getDefaultWebClientId())
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                handleSignInResult(task)
+            }
+        }
+
         setContent {
-            val context = LocalContext.current
             Test3Theme(theme = currentTheme) {
                 val isDarkTheme = isSystemInDarkTheme()
                 val backgroundColor = MaterialTheme.colorScheme.background
@@ -120,15 +125,7 @@ class LoginActivity : ComponentActivity() {
 
     private fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, RC_SIGN_IN)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
-        }
+        googleSignInLauncher.launch(signInIntent)
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
@@ -140,7 +137,6 @@ class LoginActivity : ComponentActivity() {
                     if (task.isSuccessful) {
                         val user = auth.currentUser
                         if (user != null) {
-                            // Check if the user is already registered
                             checkIfUserIsRegistered(user.email) { isRegistered ->
                                 if (isRegistered) {
                                     onLoginSuccess()
@@ -152,11 +148,11 @@ class LoginActivity : ComponentActivity() {
                             }
                         }
                     } else {
-                        showError("Sign in failed: ${task.exception?.message}")
+                        showError(getString(R.string.error_message, task.exception?.message))
                     }
                 }
         } catch (e: ApiException) {
-            showError("Sign in failed: ${e.message}")
+            showError(getString(R.string.error_message, e.message))
         }
     }
 
@@ -177,11 +173,11 @@ class LoginActivity : ComponentActivity() {
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text("Error") },
+                title = { Text(stringResource(R.string.error)) },
                 text = { Text(message) },
                 confirmButton = {
                     Button(onClick = { showDialog = false }) {
-                        Text("OK")
+                        Text(stringResource(R.string.ok))
                     }
                 }
             )
@@ -195,18 +191,18 @@ class LoginActivity : ComponentActivity() {
         if (showDialog) {
             AlertDialog(
                 onDismissRequest = { showDialog = false },
-                title = { Text("Registrazione") },
-                text = { Text("Vuoi registrarti all'app con l'account $email?") },
+                title = { Text(stringResource(R.string.registration)) },
+                text = { Text(stringResource(R.string.registration_prompt, email ?: "")) },
                 confirmButton = {
                     Button(onClick = {
                         showDialog = false
                     }) {
-                        Text("Sì")
+                        Text(stringResource(R.string.yes))
                     }
                 },
                 dismissButton = {
                     Button(onClick = { showDialog = false }) {
-                        Text("No")
+                        Text(stringResource(R.string.no))
                     }
                 }
             )
@@ -249,12 +245,12 @@ fun LoginScreen(appName: String, onLoginSuccess: () -> Unit,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Benvenuto",
+                        text = stringResource(R.string.welcome),
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        text = "su $appName",
+                        text = stringResource(R.string.welcome_to, appName),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.inversePrimary
                     )
@@ -286,13 +282,13 @@ fun LoginScreen(appName: String, onLoginSuccess: () -> Unit,
                     ) {
                         Icon(
                             imageVector = Icons.Filled.AccountCircle,
-                            contentDescription = "Google Logo",
+                            contentDescription = stringResource(R.string.google_logo),
                             tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Continua con Google",
+                            text = stringResource(R.string.continue_with_google),
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -308,12 +304,12 @@ fun LoginScreen(appName: String, onLoginSuccess: () -> Unit,
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Benvenuto",
+                    text = stringResource(R.string.welcome),
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = "su $appName",
+                    text = stringResource(R.string.welcome_to, appName),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.inversePrimary
                 )
@@ -337,13 +333,13 @@ fun LoginScreen(appName: String, onLoginSuccess: () -> Unit,
                 ) {
                     Icon(
                         imageVector = Icons.Filled.AccountCircle,
-                        contentDescription = "Google Logo",
+                        contentDescription = stringResource(R.string.google_logo),
                         tint = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Continua con Google",
+                        text = stringResource(R.string.continue_with_google),
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
@@ -368,7 +364,7 @@ fun LoginForm(
     OutlinedTextField(
         value = username,
         onValueChange = onUsernameChange,
-        label = { Text("Nome utente") },
+        label = { Text(stringResource(R.string.username)) },
         leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
         modifier = Modifier.fillMaxWidth()
     )
@@ -376,7 +372,7 @@ fun LoginForm(
     OutlinedTextField(
         value = email,
         onValueChange = onEmailChange,
-        label = { Text("Email") },
+        label = { Text(stringResource(R.string.email)) },
         leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
         modifier = Modifier.fillMaxWidth()
     )
@@ -384,15 +380,15 @@ fun LoginForm(
     OutlinedTextField(
         value = password,
         onValueChange = onPasswordChange,
-        label = { Text("Password") },
+        label = { Text(stringResource(R.string.password)) },
         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
         trailingIcon = {
             IconButton(onClick = { onPasswordVisibleChange(!passwordVisible) }) {
                 Icon(
                     imageVector = if (passwordVisible) Icons.Default.Visibility else
                         Icons.Default.VisibilityOff,
-                    contentDescription = if (passwordVisible) "Nascondi password" else
-                        "Mostra password"
+                    contentDescription = if (passwordVisible) stringResource(R.string.hide_password) else
+                        stringResource(R.string.show_password)
                 )
             }
         },
@@ -407,18 +403,18 @@ fun LoginForm(
         onClick = { onLoginSuccess() },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text("Login")
+        Text(stringResource(R.string.login))
     }
     Spacer(modifier = Modifier.height(32.dp))
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
         Text(
-            text = "Non hai un account?",
+            text = stringResource(R.string.no_account),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
-        Divider(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.weight(1f))
     }
     Spacer(modifier = Modifier.height(16.dp))
     Row(
@@ -426,10 +422,10 @@ fun LoginForm(
         modifier = Modifier.fillMaxWidth()
     ) {
         Button(onClick = { onRegisterClick() }) {
-            Text("Registrati")
+            Text(stringResource(R.string.register))
         }
         Button(onClick = { /* Handle use without account */ }) {
-            Text("Usa senza account")
+            Text(stringResource(R.string.use_without_account))
         }
     }
 }

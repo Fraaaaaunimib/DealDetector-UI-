@@ -1,3 +1,4 @@
+// com/example/navi/DealsActivity.kt
 package com.example.navi
 
 import android.annotation.SuppressLint
@@ -8,6 +9,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Label
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.toArgb
@@ -16,9 +19,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.navi.ui.theme.Test3Theme
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,36 +28,22 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Label
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.example.navi.CategoryItem
-import com.example.navi.ImageCarousel
 
-/* File per i dettagli delle offerte quando si clicca su un'offerta
-Da fare: vedere se le info che ci sono vanno bene
-Quando lo schermo è abbastanza largo, visualizzare le info in una griglia piuttosto che in una
-lista (o almeno permettere all'utente di scegliere il tipo di visualizzazione)
-IMPORTANTE: lasciare l'implementazione con "Intent" - in questo modo, non viene visualizzata
-la navbar dell'app, ma viene visualizzata come una nuova pagina
-* */
 class DealsActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,12 +71,7 @@ class DealsActivity : FragmentActivity() {
                     DealsScreen(
                         viewOption = "grid",
                         onViewOptionChange = { _, _ -> },
-                        sortOption = "price",
                         onSortOptionChange = {},
-                        showDettagliMenu = false,
-                        onShowDettagliMenuChange = {},
-                        showOrdinaMenu = false,
-                        onShowOrdinaMenuChange = {},
                         preferencesManager = preferencesManager
                     )
                 }
@@ -106,9 +88,8 @@ fun DealDetailScreen(
     preferencesManager: PreferencesManager,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
     val currentTheme = preferencesManager.currentTheme
-    var orientation by remember { mutableStateOf(Configuration.ORIENTATION_PORTRAIT) }
+    var orientation by remember { mutableIntStateOf(Configuration.ORIENTATION_PORTRAIT) }
     var showHorizontalNavigationBar by remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
     var isTopBarVisible by remember { mutableStateOf(true) }
@@ -154,7 +135,7 @@ fun DealDetailScreen(
                             title = { Text(text = "") },
                             navigationIcon = {
                                 IconButton(onClick = onBack) {
-                                    Icon(Icons.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onBackground)
                                 }
                             },
                             colors = TopAppBarDefaults.topAppBarColors(
@@ -214,7 +195,7 @@ fun DealDetailScreen(
                                                 label = { Text(text = category) },
                                                 leadingIcon = {
                                                     Icon(
-                                                        imageVector = Icons.Default.Label,
+                                                        imageVector = Icons.AutoMirrored.Filled.Label,
                                                         contentDescription = null,
                                                         modifier = Modifier.size(16.dp)
                                                     )
@@ -247,7 +228,7 @@ fun DealDetailScreen(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                     Text(
-                                        text = "Sconto: $formattedDiscount",
+                                        text = stringResource(R.string.discount, formattedDiscount),
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.inversePrimary
                                     )
@@ -309,10 +290,10 @@ data class CategoryItem(
 @Composable
 fun CategoryList(deal: Deal) {
     val categories = listOf(
-        CategoryItem("Negozio", deal.supermarket, Icons.Default.ShoppingCart),
-        CategoryItem("Prezzo per chilo", deal.priceKilo, Icons.Default.AttachMoney),
-        CategoryItem("Prezzo normale", deal.priceNormal, Icons.Default.AttachMoney),
-        CategoryItem("Tipo di offerta", deal.dealType, Icons.Default.Info)
+        CategoryItem(stringResource(R.string.store), deal.supermarket, Icons.Default.ShoppingCart),
+        CategoryItem(stringResource(R.string.price_per_kilo), deal.priceKilo, Icons.Default.AttachMoney),
+        CategoryItem(stringResource(R.string.normal_price), deal.priceNormal, Icons.Default.AttachMoney),
+        CategoryItem(stringResource(R.string.deal_type), deal.dealType, Icons.Default.Info)
     )
 
     val currencySymbol = java.util.Currency.getInstance(java.util.Locale.getDefault()).symbol
@@ -321,7 +302,7 @@ fun CategoryList(deal: Deal) {
         modifier = Modifier.fillMaxWidth()
     ) {
         categories.forEach { categoryItem ->
-            val formattedData = if (categoryItem.name == "Prezzo per chilo" || categoryItem.name == "Prezzo normale") {
+            val formattedData = if (categoryItem.name == stringResource(R.string.price_per_kilo) || categoryItem.name == stringResource(R.string.normal_price)) {
                 if (categoryItem.data is Double) {
                     val dataString = categoryItem.data.toString()
                     if (dataString.endsWith(".0")) {

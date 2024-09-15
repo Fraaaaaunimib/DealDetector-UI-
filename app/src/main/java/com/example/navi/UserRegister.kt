@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -21,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -28,8 +28,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.navi.ui.theme.Test3Theme
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
-//pagina di registrazione utente - non finita
 class RegistrationActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
 
@@ -77,14 +77,12 @@ fun RegistrationScreen(onBack: () -> Unit, auth: FirebaseAuth) {
     var password by rememberSaveable { mutableStateOf("") }
     var confirmPassword by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
-    var selectedImageUri by rememberSaveable { mutableStateOf<String?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     var registrationError by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val primaryColor = MaterialTheme.colorScheme.primary
     val backgroundColor = MaterialTheme.colorScheme.background
 
     LaunchedEffect(Unit) {
@@ -105,20 +103,19 @@ fun RegistrationScreen(onBack: () -> Unit, auth: FirebaseAuth) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Conferma") },
-            text = { Text("Sei sicuro di voler tornare indietro? Perderai tutto" +
-                    " quello che hai scritto.") },
+            title = { Text(stringResource(id = R.string.confirm)) },
+            text = { Text(stringResource(id = R.string.confirm_back_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showDialog = false
                     onBack()
                 }) {
-                    Text("Sì")
+                    Text(stringResource(id = R.string.yes))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("No")
+                    Text(stringResource(id = R.string.no))
                 }
             }
         )
@@ -138,8 +135,9 @@ fun RegistrationScreen(onBack: () -> Unit, auth: FirebaseAuth) {
                             onBack()
                         }
                     }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onBackground)
+
+Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back),
+    tint = MaterialTheme.colorScheme.onBackground)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -170,13 +168,13 @@ fun RegistrationScreen(onBack: () -> Unit, auth: FirebaseAuth) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Registrati",
+                            text = stringResource(id = R.string.register),
                             style = MaterialTheme.typography.headlineLarge,
                             color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(bottom = 24.dp)
                         )
                         Text(
-                            text = "To do - Una volta che effettui il login nell'app, non chiedo più la password di questo account, perchè tanto c'è l'autenticazione biometrica, e quindi verrà richiesta soltanto una volta che faccio il logout.",
+                            text = stringResource(id = R.string.registration_info),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(bottom = 24.dp)
@@ -213,7 +211,7 @@ fun RegistrationScreen(onBack: () -> Unit, auth: FirebaseAuth) {
                                             }
                                         }
                                 } else {
-                                    registrationError = "Passwords do not match"
+
                                 }
                             }
                         )
@@ -230,13 +228,13 @@ fun RegistrationScreen(onBack: () -> Unit, auth: FirebaseAuth) {
                 ) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "Registrati",
+                        text = stringResource(id = R.string.register),
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
                     Text(
-                        text = "To do - Una volta che effettui il login nell'app, non chiedo più la password di questo account, perchè tanto c'è l'autenticazione biometrica, e quindi verrà richiesta soltanto una volta che faccio il logout.",
+                        text = stringResource(id = R.string.registration_info),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 24.dp)
@@ -266,7 +264,7 @@ fun RegistrationScreen(onBack: () -> Unit, auth: FirebaseAuth) {
                                         }
                                     }
                             } else {
-                                registrationError = "Passwords do not match"
+
                             }
                         }
                     )
@@ -305,42 +303,42 @@ fun RegistrationForm(
         OutlinedTextField(
             value = firstName,
             onValueChange = onFirstNameChange,
-            label = { Text("First Name") },
+            label = { Text(stringResource(id = R.string.first_name)) },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = lastName,
             onValueChange = onLastNameChange,
-            label = { Text("Last Name") },
+            label = { Text(stringResource(id = R.string.last_name)) },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = username,
             onValueChange = onUsernameChange,
-            label = { Text("Username") },
+            label = { Text(stringResource(id = R.string.username)) },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Email") },
+            label = { Text(stringResource(id = R.string.email)) },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            label = { Text("Password") },
+            label = { Text(stringResource(id = R.string.password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else
                 PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { onPasswordVisibleChange(!passwordVisible) }) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        contentDescription = if (passwordVisible) stringResource(id = R.string.hide_password) else stringResource(id = R.string.show_password)
                     )
                 }
             },
@@ -350,14 +348,14 @@ fun RegistrationForm(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = onConfirmPasswordChange,
-            label = { Text("Confirm Password") },
+            label = { Text(stringResource(id = R.string.confirm_password)) },
             visualTransformation = if (passwordVisible) VisualTransformation.None else
                 PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { onPasswordVisibleChange(!passwordVisible) }) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        contentDescription = if (passwordVisible) stringResource(id = R.string.hide_password) else stringResource(id = R.string.show_password)
                     )
                 }
             },
@@ -368,7 +366,7 @@ fun RegistrationForm(
             onClick = onRegisterClick,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Register")
+            Text(stringResource(id = R.string.register))
         }
     }
 }

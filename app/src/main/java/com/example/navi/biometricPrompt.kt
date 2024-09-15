@@ -6,12 +6,9 @@ import androidx.core.content.ContextCompat
 import androidx.biometric.BiometricManager.Authenticators
 import android.widget.Toast
 
-/* File per visualizzare la richiesta biometrica
-* Da mettere a posto: non funziona con l'autenticazione via viso*/
 fun showBiometricPrompt(
     activity: FragmentActivity,
     onSuccess: () -> Unit,
-    onFailure: () -> Unit,
     onCancel: () -> Unit
 ) {
     val executor = ContextCompat.getMainExecutor(activity)
@@ -23,7 +20,7 @@ fun showBiometricPrompt(
                     errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
                     onCancel()
                 } else {
-                    Toast.makeText(activity, "Errore: $errString", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(activity, activity.getString(R.string.error_message, errString), Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -34,13 +31,13 @@ fun showBiometricPrompt(
 
             override fun onAuthenticationFailed() {
                 super.onAuthenticationFailed()
-                Toast.makeText(activity, "Autenticazione non riuscita", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, R.string.authentication_failed, Toast.LENGTH_SHORT).show()
             }
         })
 
     val promptInfo = BiometricPrompt.PromptInfo.Builder()
-        .setTitle("Usa il tuo volto, l'impronta o il PIN")
-        .setSubtitle("Per usare questa funzionalità, è necessario autenticarsi")
+        .setTitle(activity.getString(R.string.biometric_prompt_title))
+        .setSubtitle(activity.getString(R.string.biometric_prompt_subtitle))
         .setAllowedAuthenticators(Authenticators.BIOMETRIC_STRONG or
                 Authenticators.DEVICE_CREDENTIAL)
         .build()

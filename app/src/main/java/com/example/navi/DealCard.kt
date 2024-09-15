@@ -2,7 +2,6 @@ package com.example.navi
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,9 +14,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.parcelize.Parcelize
 
-/* File per le card in Le Mie Offerte, da poi riutilizzare anche per le categorie, e per visualizzare
-le offerte nelle varie categorie.
-* */
 @Composable
 fun DealCard(
     deal: Deal,
@@ -59,7 +55,6 @@ fun DealCard(
     }
 }
 
-// classe esempio per le offerte
 @SuppressLint("ParcelCreator")
 @Parcelize
 data class Deal(
@@ -73,9 +68,4 @@ data class Deal(
     var priceNormal: Double,
     var dealPerc: Double,
     var dealType: String
-) : Parcelable {
-    override fun describeContents(): Int {
-        TODO("")
-    }
-
-}
+) : Parcelable

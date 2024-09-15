@@ -1,42 +1,39 @@
+// java/com/example/navi/AuthenticationExplanationActivity.kt
 package com.example.navi
 
+import android.content.res.Configuration
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
+import android.view.Window
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import com.example.navi.ui.theme.Test3Theme
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.navi.ui.theme.Test3Theme
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.core.view.WindowInsetsControllerCompat
 
-/* AuthExplain: questo file serve per spiegare l'autenticazione biometrica, si apre quando schiacci
-non sul toggle ma sulla parte di testo nelle Impostazioni.
-Altre cose da metterci: toggle per selezionare quando chiedere autenticazione biometrica
-Da mettere a posto: se io cambio l'impostazione in questa pagina, non si cambia anche in Settings
-NOTA PER TUTTI GLI ALTRI FILE: l'errore "Composable invocations can only happen..." non è un errore
-importante
-* */
-class AuthenticationExplanationActivity : FragmentActivity() {
+class AuthenticationExplanationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -45,43 +42,44 @@ class AuthenticationExplanationActivity : FragmentActivity() {
             val currentTheme = preferencesManager.currentTheme
 
             Test3Theme(theme = currentTheme) {
-                val isDarkTheme = isSystemInDarkTheme()
-                val backgroundColor = MaterialTheme.colorScheme.background
-
-                SideEffect {
-                    val window = (context as FragmentActivity).window
-                    WindowCompat.setDecorFitsSystemWindows(window, false)
-                    val insetsController = WindowInsetsControllerCompat(window, window.decorView)
-                    window.statusBarColor = backgroundColor.toArgb()
-                    insetsController.isAppearanceLightStatusBars = !isDarkTheme
-                }
-
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = backgroundColor
-                ) {
-                    AuthenticationExplanationScreen(
-                        preferencesManager = preferencesManager,
-                        onBack = { finish() }
-                    )
-                }
+                AuthenticationExplanationScreen(
+                    preferencesManager = preferencesManager,
+                    currentTheme = preferencesManager.currentTheme,
+                    onBack = { finish() }
+                )
             }
         }
     }
 }
 
+@Composable
+fun ConfigureWindow(currentTheme: String) {
+    val context = LocalContext.current
+    val colorScheme = MaterialTheme.colorScheme
+    SideEffect {
+        val window = (context as AppCompatActivity).window
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = colorScheme.background.toArgb()
+        window.navigationBarColor = colorScheme.background.toArgb()
+    }
+}
+
+@Composable
+fun UpdateStatusBarTextColor(window: Window, selectedTheme: String) {
+    val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+    insetsController.isAppearanceLightStatusBars = selectedTheme == stringResource(R.string.light_theme) || (selectedTheme == DEFAULT_THEME && (window.context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AuthenticationExplanationScreen(
-    preferencesManager: PreferencesManager,
-    onBack: () -> Unit
-) {
+fun AuthenticationExplanationScreen(preferencesManager: PreferencesManager, onBack: () -> Unit, currentTheme: String) {
     val context = LocalContext.current
-    var requireIdentification by remember { mutableStateOf(preferencesManager.
-    requireIdentification) }
-    val currentTheme = preferencesManager.currentTheme
+    val sharedViewModel: SharedViewModel = viewModel(factory = SharedViewModelFactory(preferencesManager))
+    val requireIdentification by sharedViewModel.requireIdentification.collectAsState()
 
     Test3Theme(theme = currentTheme) {
+        ConfigureWindow(currentTheme)
+
         AnimatedVisibility(
             visible = true,
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -93,7 +91,7 @@ fun AuthenticationExplanationScreen(
                         title = { Text(text = "") },
                         navigationIcon = {
                             IconButton(onClick = onBack) {
-                                Icon(Icons.Filled.ArrowBack, contentDescription = "Back",
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back),
                                     tint = MaterialTheme.colorScheme.onBackground)
                             }
                         },
@@ -113,67 +111,57 @@ fun AuthenticationExplanationScreen(
                 ) {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
-                        text = "Richiedi autenticazione quando apro l'app",
+                        text = stringResource(R.string.request_authentication),
                         style = MaterialTheme.typography.headlineLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
                     Box(
-    modifier = Modifier
-        .fillMaxWidth()
-        .clip(RoundedCornerShape(32.dp))
-        .background(MaterialTheme.colorScheme.secondaryContainer)
-        .clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = rememberRipple(bounded = true)
-        ) {
-            showBiometricPrompt(
-                activity = context as FragmentActivity,
-                onSuccess = {
-                    requireIdentification = !requireIdentification
-                    preferencesManager.requireIdentification = requireIdentification
-                },
-                onFailure = {},
-                onCancel = {
-                    requireIdentification = preferencesManager.requireIdentification
-                }
-            )
-        }
-        .padding(16.dp)
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = "Richiedi autenticazione",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f)
-        )
-        Switch(
-            checked = requireIdentification,
-            onCheckedChange = {
-                showBiometricPrompt(
-                    activity = context as FragmentActivity,
-                    onSuccess = {
-                        requireIdentification = it
-                        preferencesManager.requireIdentification = it
-                    },
-                    onFailure = {},
-                    onCancel = {
-                        requireIdentification = preferencesManager.requireIdentification
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(32.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(bounded = true)
+                            ) {
+                                showBiometricPrompt(
+                                    activity = context as AppCompatActivity,
+                                    onSuccess = {
+                                        sharedViewModel.setRequireIdentification(!requireIdentification)
+                                    },
+                                    onCancel = {}
+                                )
+                            }
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(R.string.request_authentication_option),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Switch(
+                                checked = requireIdentification,
+                                onCheckedChange = {
+                                    showBiometricPrompt(
+                                        activity = context as AppCompatActivity,
+                                        onSuccess = {
+                                            sharedViewModel.setRequireIdentification(it)
+                                        },
+                                        onCancel = {}
+                                    )
+                                }
+                            )
+                        }
                     }
-                )
-            }
-        )
-    }
-}
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Questa opzione richiede l'autenticazione" +
-                                " biometrica o il PIN ogni volta che apri l'app " +
-                                "per garantire la sicurezza del tuo account.",
+                        text = stringResource(R.string.authentication_description),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )

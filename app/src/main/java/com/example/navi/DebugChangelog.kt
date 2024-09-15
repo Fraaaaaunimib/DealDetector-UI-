@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -19,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.navi.ui.theme.Test3Theme
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 //Changelog per le varie versioni - non preoccuparti dei vari codename particolari :D
 //forse sarà meglio rimuoverlo alla fine...
@@ -66,7 +66,7 @@ fun ChangelogItem(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         Text(
             text = itemTitle,
             style = MaterialTheme.typography.headlineSmall,
@@ -93,7 +93,7 @@ fun ChangelogScreen(onBackClick: () -> Unit) {
             title = { Text("Changelog") },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
-                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back")
+                   Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
             }
         )
@@ -129,6 +129,12 @@ data class ChangelogItemData(
 
 fun getChangelogItems(): List<ChangelogItemData> {
     return listOf(
+        ChangelogItemData(
+            categoryTitle = "13th September 2024",
+            itemTitle = "Version Katana",
+            itemSubtitle = "Build 0.0.25.410",
+            itemText = "Changed the navigation bar and status bar color to be consistent. Changed completely how the scrolling between pages works, by deprecating the pager, and instead opting for a simpler solution. Changed the drop down menus to be bottom sheets, to align more with Material You. Fixed the status bar colors in light and dark mode. Done an entire refactory in the whole app to optimise it, remove unnecessary values or imports, and moving all strings to strings.xml, to start working on language packs."
+        ),
         ChangelogItemData(
             categoryTitle = "6th September 2024",
             itemTitle = "Version Phantom",

@@ -5,13 +5,14 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.BundleCompat
 import com.example.navi.ui.theme.Test3Theme
 
 class DealDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val deal = intent.getParcelableExtra<Deal>("deal")
+            val deal = intent.extras?.let { BundleCompat.getParcelable(it, "deal", Deal::class.java) }
             val context = LocalContext.current
             val preferencesManager = remember { PreferencesManager(context) }
             val currentTheme = preferencesManager.currentTheme
